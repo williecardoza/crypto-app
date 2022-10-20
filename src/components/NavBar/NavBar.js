@@ -17,32 +17,26 @@ import {
   RightContainer,
   StyledLink,
   StyledArrowIcon,
+  StyledSearchIcon,
+  StyledThemeIcon,
   Ul,
 } from "./NavBar.styles.js";
-import { ReactComponent as ThemeIcon } from "../SVG/themeIcon.svg";
-import { ReactComponent as SearchIcon } from "../SVG/searchIcon.svg";
+import {
+  handleThemeChange,
+  handleSelectedCurrency,
+} from "../../store/app/actions";
+import { useDispatch, useSelector } from "react-redux";
 
-const NavBar = props => {
-  const [clickedLink, setClickedLink] = useState(false);
+const NavBar = () => {
   const [dropDown, setDropdown] = useState(false);
+  const currency = useSelector(state => state.app.currency);
+  const dispatch = useDispatch();
   const currencies = [
     { name: "usd", symbol: "$" },
     { name: "eur", symbol: "€" },
     { name: "gbp", symbol: "£" },
   ];
-  const handleDropdown = () => {
-    setDropdown(!dropDown);
-  };
-  const handleDropdownFocus = () => {
-    setDropdown(false);
-  };
-  const handleSelectedCurrency = currency => {
-    setDropdown(!dropDown);
-    props.handleSelectedCurrency(currency);
-  };
-  const handleClickedLink = () => {
-    setClickedLink(!clickedLink);
-  };
+
   return (
     <Nav>
       <Ul>
@@ -50,10 +44,7 @@ const NavBar = props => {
           <LeftContainer>
             <LinkLi>
               <StyledLink to="/">
-                <LinkWrapper
-                  onClick={handleClickedLink}
-                  currentPage={window.location.pathname === "/"}
-                >
+                <LinkWrapper currentPage={window.location.pathname === "/"}>
                   Coins
                 </LinkWrapper>
               </StyledLink>
@@ -61,7 +52,6 @@ const NavBar = props => {
             <LinkLi>
               <StyledLink to="/Portfolio">
                 <LinkWrapper
-                  onClick={handleClickedLink}
                   currentPage={window.location.pathname === "/Portfolio"}
                 >
                   Portfolio
@@ -72,19 +62,19 @@ const NavBar = props => {
           <RightContainer>
             <Li>
               <InputContainer>
-                <SearchIcon fill={props.theme.color} />
+                <StyledSearchIcon />
                 <Input type="text" placeholder="Search..." />
               </InputContainer>
             </Li>
-            <Li onClick={handleDropdown}>
+            <Li onClick={() => setDropdown(!dropDown)}>
               <CurrencyWrapper>
                 <CurrencyContainer>
-                  {currencies.map(currency => {
-                    if (currency.name === props.currency) {
+                  {currencies.map(value => {
+                    if (value.name === currency) {
                       return (
                         <>
-                          <CurrencySymbol>{currency.symbol}</CurrencySymbol>
-                          <div>{currency.name.toUpperCase()}</div>
+                          <CurrencySymbol>{value.symbol}</CurrencySymbol>
+                          <div>{value.name.toUpperCase()}</div>
                         </>
                       );
                     } else return false;
@@ -92,17 +82,17 @@ const NavBar = props => {
                   <StyledArrowIcon showDropdown={dropDown} />
                 </CurrencyContainer>
                 {dropDown && (
-                  <Dropdown onMouseLeave={handleDropdownFocus}>
+                  <Dropdown onMouseLeave={() => setDropdown(false)}>
                     <DropdownContainer>
-                      {currencies.map(currency => {
+                      {currencies.map(value => {
                         return (
                           <DropdownItem
                             onClick={() =>
-                              handleSelectedCurrency(currency.name)
+                              dispatch(handleSelectedCurrency(value.name))
                             }
                           >
-                            <CurrencySymbol>{currency.symbol}</CurrencySymbol>
-                            <div>{currency.name.toUpperCase()}</div>
+                            <CurrencySymbol>{value.symbol}</CurrencySymbol>
+                            <div>{value.name.toUpperCase()}</div>
                           </DropdownItem>
                         );
                       })}
@@ -111,8 +101,8 @@ const NavBar = props => {
                 )}
               </CurrencyWrapper>
             </Li>
-            <Li onClick={props.handleThemeChange}>
-              <ThemeIcon fill={props.theme.color} />
+            <Li onClick={() => dispatch(handleThemeChange())}>
+              <StyledThemeIcon />
             </Li>
           </RightContainer>
         </Container>

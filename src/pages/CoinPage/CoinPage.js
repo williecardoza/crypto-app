@@ -1,5 +1,6 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCoinData, getCoinHistory } from "../../store/coin/actions";
 import { CoinSummary } from "../../components";
 import { CoinPageChart } from "../../components";
 import {
@@ -24,9 +25,11 @@ import {
 
 const CoinPage = props => {
   const [calculatorValue, setCalculatorValue] = useState(null);
-  const [coinHistory, setCoinHistory] = useState(null);
-  const [data, setData] = useState(null);
   const [inputValue, setInputValue] = useState(null);
+  const dispatch = useDispatch();
+  const data = useSelector(state => state.coin.data);
+  const coinHistory = useSelector(state => state.coin.coinHistory);
+  const currency = useSelector(state => state.app.currency);
   const timeFrames = [
     { interval: "1d", days: 1 },
     { interval: "7d", days: 7 },
@@ -36,32 +39,17 @@ const CoinPage = props => {
     { interval: "5y", days: 1800 },
   ];
 
-  const fetchCoinData = async () => {
-    try {
-      const coinURL = `https://api.coingecko.com/api/v3/coins/${props.match.params.coinId.toLowerCase()}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=false&sparkline=false`;
-      const { data } = await axios(coinURL);
-      setData(data);
-    } catch (error) {}
-  };
-
-  const fetchCoinHistory = async days => {
-    try {
-      const coinURL = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=${props.currency.toLowerCase()}&days=${days}`;
-      const { data } = await axios(coinURL);
-      setCoinHistory(data);
-    } catch (error) {}
-  };
-
   const handleChange = e => {
-    const sum = e.target.value / data.market_data.current_price[props.currency];
+    const sum = e.target.value / data.market_data.current_price[currency];
     setCalculatorValue(sum);
     setInputValue(e.target.text);
   };
 
   useEffect(() => {
-    fetchCoinData();
-    fetchCoinHistory(7);
-  });
+    dispatch(getCoinData(props.match.params.coinId.toLowerCase()));
+    dispatch(getCoinHistory(7, currency));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container>
@@ -69,7 +57,7 @@ const CoinPage = props => {
         <Wrapper>
           <h2>Your Summary</h2>
           <ThemeContainer>
-            <CoinSummary data={data} currency={props.currency} />
+            <CoinSummary data={data} currency={currency} />
           </ThemeContainer>
           <h2>Description</h2>
           <Theme>
@@ -82,7 +70,7 @@ const CoinPage = props => {
           </Theme>
           <CalculatorContainer>
             <Calculator>
-              <Currency>{props.currency.toUpperCase()}</Currency>
+              <Currency>{currency.toUpperCase()}</Currency>
               <Input
                 onChange={handleChange}
                 type={"number"}
@@ -106,7 +94,7 @@ const CoinPage = props => {
               <TimeFrame>
                 <Button
                   onClick={() => {
-                    fetchCoinHistory(timeframe.days);
+                    dispatch(getCoinHistory(timeframe.days, currency));
                   }}
                 />
                 <Time>{timeframe.interval}</Time>
@@ -123,4 +111,5 @@ const CoinPage = props => {
     </Container>
   );
 };
+
 export default CoinPage;

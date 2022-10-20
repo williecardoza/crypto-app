@@ -1,38 +1,32 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getBitcoinData, getCoinList } from "../../store/home/actions";
 import BitcoinChart from "../../components/BitcoinChart";
 import CoinList from "../../components/CoinList";
 
-const HomePage = props => {
-  const [coinList, setCoinList] = useState([]);
-  const [data, setData] = useState(null);
-
-  const getCoinList = async () => {
-    try {
-      const coinListURL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${props.currency}&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d`;
-      const { data } = await axios(coinListURL);
-      setCoinList(data);
-    } catch (error) {}
-  };
-
-  const getBitcoinData = async () => {
-    try {
-      const bitcoinDataURL = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=${props.currency}&days=180&interval=daily`;
-      const { data } = await axios(bitcoinDataURL);
-      setData(data);
-    } catch (error) {}
-  };
+const HomePage = () => {
+  const bitcoinData = useSelector(state => state.coinList.bitcoinData);
+  const coinList = useSelector(state => state.coinList.coinList);
+  const currency = useSelector(state => state.app.currency);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    getCoinList();
-    getBitcoinData();
-  });
+    dispatch(getCoinList(currency));
+    dispatch(getBitcoinData(currency));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  useEffect(() => {
+    dispatch(getCoinList(currency));
+    dispatch(getBitcoinData(currency));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
   return (
     <>
-      {data && <BitcoinChart data={data} currency={props.currency} />}
-      <CoinList coinList={coinList} currency={props.currency} />
+      {bitcoinData && <BitcoinChart data={bitcoinData} currency={currency} />}
+      {coinList && <CoinList coinList={coinList} currency={currency} />}
     </>
   );
 };
+
 export default HomePage;

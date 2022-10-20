@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { ReactComponent as ArrowSVG } from "../SVG/arrowIcon.svg";
+import { ReactComponent as ThemeIcon } from "../SVG/themeIcon.svg";
+import { ReactComponent as SearchIcon } from "../SVG/searchIcon.svg";
 
 export const StyledLink = styled(Link)`
   color: ${props => props.theme.color};
@@ -12,6 +14,14 @@ export const StyledArrowIcon = styled(ArrowSVG)`
   margin-left: 5px;
   transform: ${props =>
     props.showDropdown ? "rotate(0deg)" : "rotate(180deg)"};
+`;
+
+export const StyledSearchIcon = styled(SearchIcon)`
+  fill: ${props => props.theme.color};
+`;
+
+export const StyledThemeIcon = styled(ThemeIcon)`
+  fill: ${props => props.theme.color};
 `;
 
 export const Container = styled.div`
